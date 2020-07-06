@@ -7,16 +7,19 @@ using UnityEngine.InputSystem;
 
 public class CharacterMovement : MonoBehaviour
 {
-    [SerializeField] private float speed = 10f;
+    [SerializeField] private float speed = 8f;
 
-    [SerializeField] public Rouguelite controls;
+    private Rouguelite controls;
+
+    private new Rigidbody2D rigidbody2D;
     private Animator animator;
 
     private void Awake()
     {
         this.animator = GetComponent<Animator>();
+        this.rigidbody2D = GetComponent<Rigidbody2D>();
 
-        controls.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
+        controls = new Rouguelite();
     }
 
     void Start()
@@ -26,11 +29,31 @@ public class CharacterMovement : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 
-    public void Move(Vector2 direction)
+    private void FixedUpdate()
     {
-        transform.position += new Vector3(direction.x * speed * Time.deltaTime, direction.y * speed * Time.deltaTime, 0f);
+        Vector2 moveDirection = controls.Player.Move.ReadValue<Vector2>();
+        Move(moveDirection);
+    }
+
+    private void Move(Vector2 direction)
+    {
+        if (direction.x != 0 && direction.y != 0)
+        {
+            direction /= 2f;
+        }
+
+        this.rigidbody2D.velocity = direction.normalized * speed;
+    }
+    
+    void OnEnable() 
+    {
+        controls.Player.Enable();
+    }
+    void OnDisable() 
+    {
+        controls.Player.Disable();
     }
 }
